@@ -51,8 +51,10 @@ export default async function handler(req, res) {
 - **Salário:** ${data.salario || ''}
 - **Carga Horária:** ${data.cargaHoraria || ''}
 
----
-*(Nota do Sistema: Nesta versão, os arquivos de anexo ainda não sobem automaticamente para o cartão. O candidato pode enviar via WhatsApp).*
+**4. Documentos Anexados**
+- **Documento de Identificação:** ${data.fileUrls?.identificacao ? `[Baixar/Ver Arquivo](${data.fileUrls.identificacao})` : 'Não enviado'}
+- **Comprovante de Endereço:** ${data.fileUrls?.endereco ? `[Baixar/Ver Arquivo](${data.fileUrls.endereco})` : 'Não enviado'}
+- **Exame Admissional:** ${data.fileUrls?.exame ? `[Baixar/Ver Arquivo](${data.fileUrls.exame})` : 'Não enviado'}
     `;
 
     // Cria o Cartão no Trello via API
