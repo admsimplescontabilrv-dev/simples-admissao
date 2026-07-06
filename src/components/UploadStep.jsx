@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '../firebase'; // Importa configuração do Firebase
 
 function UploadStep({ onBack, onSubmit }) {
   const [files, setFiles] = useState({
@@ -19,31 +17,49 @@ function UploadStep({ onBack, onSubmit }) {
     }
   };
 
+  const uploadToCloudinary = async (fileObj) => {
+    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+    
+    if (!cloudName || !uploadPreset) {
+      throw new Error("Credenciais do Cloudinary não configuradas");
+    }
+
+    const formData = new FormData();
+    formData.append('file', fileObj);
+    formData.append('upload_preset', uploadPreset);
+
+    // auto serve para imagens, pdfs, etc
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!response.ok) {
+      throw new Error('Falha no upload para o Cloudinary');
+    }
+
+    const data = await response.json();
+    return data.secure_url;
+  };
+
   const handleSubmitClick = async () => {
     setIsUploading(true);
     const fileUrls = {};
 
     try {
-      // Faz o upload de cada arquivo presente no estado
       const uploadPromises = Object.entries(files).map(async ([key, fileObj]) => {
         if (fileObj) {
-          // Cria um nome seguro para o arquivo
-          const safeName = `${Date.now()}_${fileObj.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
-          const storageRef = ref(storage, `documentos/${safeName}`);
-          
-          await uploadBytes(storageRef, fileObj);
-          const url = await getDownloadURL(storageRef);
+          const url = await uploadToCloudinary(fileObj);
           fileUrls[key] = url;
         }
       });
 
       await Promise.all(uploadPromises);
-      
-      // Envia apenas as URLs geradas para a função principal
       onSubmit({ fileUrls });
     } catch (error) {
       console.error("Erro no upload: ", error);
-      alert("Houve um erro ao enviar seus arquivos. Tente novamente.");
+      alert("Houve um erro ao enviar seus arquivos. Verifique se o Cloudinary está configurado corretamente.");
       setIsUploading(false);
     }
   };
