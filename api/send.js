@@ -72,6 +72,31 @@ export default async function handler(req, res) {
       throw new Error('Falha ao criar o cartão no Trello');
     }
 
+    const cardData = await response.json();
+    const cardId = cardData.id;
+
+    // Se houver arquivos, anexa nativamente no Trello para criar capas e miniaturas!
+    if (data.fileUrls) {
+      const labels = {
+        identificacao: "Doc de Identificação",
+        endereco: "Comprovante de Endereço",
+        exame: "Exame Admissional"
+      };
+
+      for (const [key, url] of Object.entries(data.fileUrls)) {
+        if (url) {
+          await fetch(`https://api.trello.com/1/cards/${cardId}/attachments?key=${trelloKey}&token=${trelloToken}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: labels[key] || key,
+              url: url
+            })
+          });
+        }
+      }
+    }
+
     return res.status(200).json({ success: true });
   } catch (error) {
     console.error('Erro ao integrar com Trello:', error);
