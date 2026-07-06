@@ -58,11 +58,11 @@ export default async function handler(req, res) {
     `;
 
     // Cria o Cartão no Trello via API
-    const response = await fetch(\`https://api.trello.com/1/cards?idList=\${listId}&key=\${trelloKey}&token=\${trelloToken}\`, {
+    const response = await fetch(`https://api.trello.com/1/cards?idList=${listId}&key=${trelloKey}&token=${trelloToken}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        name: \`Nova Admissão: \${data.nome || 'Candidato'}\`,
+        name: `Nova Admissão: ${data.nome || 'Candidato'}`,
         desc: desc,
         pos: 'top' // Coloca no topo da lista
       })
