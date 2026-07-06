@@ -1,5 +1,3 @@
-import nodemailer from 'nodemailer';
-
 export default async function handler(req, res) {
   // Configuração para CORS caso necessário
   res.setHeader('Access-Control-Allow-Credentials', true);
@@ -16,69 +14,65 @@ export default async function handler(req, res) {
 
   try {
     const data = req.body;
+    
+    // As chaves agora são do Trello!
+    const trelloKey = process.env.TRELLO_API_KEY;
+    const trelloToken = process.env.TRELLO_API_TOKEN;
+    const listId = process.env.TRELLO_LIST_ID;
 
-    // Configuração do servidor de e-mail (SMTP)
-    // Na Vercel, você precisará configurar essas variáveis de ambiente
-    const transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com', // Exemplo com Gmail
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.EMAIL_USER, // Ex: seuemail@gmail.com
-        pass: process.env.EMAIL_PASS, // Senha de App do Google
-      },
-    });
+    if (!trelloKey || !trelloToken || !listId) {
+      return res.status(500).json({ error: 'Credenciais do Trello não configuradas na Vercel.' });
+    }
 
-    const htmlContent = `
-      <div style="font-family: Arial, sans-serif; color: #333;">
-        <h2>Nova Admissão Recebida: ${data.nome || 'Não informado'}</h2>
-        
-        <h3>1. Dados Pessoais</h3>
-        <ul>
-          <li><strong>Nome:</strong> ${data.nome}</li>
-          <li><strong>CPF:</strong> ${data.cpf}</li>
-          <li><strong>Nascimento:</strong> ${data.dataNascimento}</li>
-          <li><strong>Mãe:</strong> ${data.filiacaoMaterna}</li>
-          <li><strong>Pai:</strong> ${data.filiacaoPaterna}</li>
-          <li><strong>Nacionalidade/Naturalidade:</strong> ${data.nacionalidade} / ${data.naturalidade}</li>
-          <li><strong>Sexo:</strong> ${data.sexo}</li>
-          <li><strong>Raça/Cor:</strong> ${data.raca}</li>
-          <li><strong>Estado Civil:</strong> ${data.estadoCivil}</li>
-          <li><strong>Grau de Instrução:</strong> ${data.grauInstrucao}</li>
-          <li><strong>Tem Filhos Menores de 21:</strong> ${data.temFilhos}</li>
-        </ul>
+    // Formatação em Markdown para ficar bonito no cartão do Trello
+    const desc = `
+**1. Dados Pessoais**
+- **Nome:** ${data.nome || ''}
+- **CPF:** ${data.cpf || ''}
+- **Nascimento:** ${data.dataNascimento || ''}
+- **Mãe:** ${data.filiacaoMaterna || ''}
+- **Pai:** ${data.filiacaoPaterna || ''}
+- **Nacionalidade/Naturalidade:** ${data.nacionalidade || ''} / ${data.naturalidade || ''}
+- **Sexo:** ${data.sexo || ''}
+- **Raça/Cor:** ${data.raca || ''}
+- **Estado Civil:** ${data.estadoCivil || ''}
+- **Grau de Instrução:** ${data.grauInstrucao || ''}
+- **Tem Filhos Menores de 21:** ${data.temFilhos || ''}
 
-        <h3>2. Endereço</h3>
-        <ul>
-          <li><strong>Logradouro:</strong> ${data.logradouro}, ${data.numero} - ${data.complemento}</li>
-          <li><strong>Bairro:</strong> ${data.bairro}</li>
-          <li><strong>Cidade/Estado:</strong> ${data.cidade} / ${data.estado}</li>
-          <li><strong>CEP:</strong> ${data.cep}</li>
-        </ul>
+**2. Endereço**
+- **Logradouro:** ${data.logradouro || ''}, ${data.numero || ''} - ${data.complemento || ''}
+- **Bairro:** ${data.bairro || ''}
+- **Cidade/Estado:** ${data.cidade || ''} / ${data.estado || ''}
+- **CEP:** ${data.cep || ''}
 
-        <h3>3. Informações da Contratação</h3>
-        <ul>
-          <li><strong>Empresa Contratante:</strong> ${data.empresa}</li>
-          <li><strong>Cargo/Função:</strong> ${data.cargo}</li>
-          <li><strong>Salário:</strong> ${data.salario}</li>
-          <li><strong>Carga Horária:</strong> ${data.cargaHoraria}</li>
-        </ul>
+**3. Informações da Contratação**
+- **Empresa Contratante:** ${data.empresa || ''}
+- **Cargo/Função:** ${data.cargo || ''}
+- **Salário:** ${data.salario || ''}
+- **Carga Horária:** ${data.cargaHoraria || ''}
 
-        <hr />
-        <p><small>Enviado automaticamente pelo Smart Form Simples Assessoria.</small></p>
-      </div>
+---
+*(Nota do Sistema: Nesta versão, os arquivos de anexo ainda não sobem automaticamente para o cartão. O candidato pode enviar via WhatsApp).*
     `;
 
-    await transporter.sendMail({
-      from: `"Admissão Simples Contábil" <${process.env.EMAIL_USER}>`,
-      to: 'departamentopessoal@simplescontabilrv.com', // O e-mail de destino solicitado
-      subject: `[Nova Admissão] ${data.nome || 'Candidato'}`,
-      html: htmlContent,
+    // Cria o Cartão no Trello via API
+    const response = await fetch(\`https://api.trello.com/1/cards?idList=\${listId}&key=\${trelloKey}&token=\${trelloToken}\`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: \`Nova Admissão: \${data.nome || 'Candidato'}\`,
+        desc: desc,
+        pos: 'top' // Coloca no topo da lista
+      })
     });
+
+    if (!response.ok) {
+      throw new Error('Falha ao criar o cartão no Trello');
+    }
 
     return res.status(200).json({ success: true });
   } catch (error) {
-    console.error('Erro ao enviar e-mail:', error);
-    return res.status(500).json({ error: 'Falha ao enviar o e-mail.' });
+    console.error('Erro ao integrar com Trello:', error);
+    return res.status(500).json({ error: 'Falha ao processar a requisição.' });
   }
 }
