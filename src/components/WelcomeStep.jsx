@@ -29,7 +29,6 @@ function WelcomeStep({ onNext }) {
           }}>
             <li>✔️ Documento de identificação com foto (RG ou CNH)</li>
             <li>✔️ Comprovante de endereço atualizado</li>
-            <li>✔️ Exame admissional (ASO)</li>
             <li>✔️ CPF e dados pessoais</li>
           </ul>
         </div>
