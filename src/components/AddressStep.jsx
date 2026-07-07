@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { maskCEP } from '../utils/masks';
 
 function AddressStep({ formData, onNext, onBack }) {
   const [localData, setLocalData] = useState({
@@ -12,7 +13,10 @@ function AddressStep({ formData, onNext, onBack }) {
   });
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    let { name, value } = e.target;
+
+    if (name === 'cep') value = maskCEP(value);
+
     setLocalData(prev => ({ ...prev, [name]: value }));
   };
 
@@ -29,7 +33,7 @@ function AddressStep({ formData, onNext, onBack }) {
       <div className="step-content">
         <div className="form-group">
           <label>CEP</label>
-          <input type="text" className="form-control" name="cep" value={localData.cep} onChange={handleChange} placeholder="EX: 75900-000" />
+          <input type="text" className="form-control" name="cep" value={localData.cep} onChange={handleChange} placeholder="#####-###" />
         </div>
 
         <div className="form-group">

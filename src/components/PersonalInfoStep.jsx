@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { maskCPF, maskDate } from '../utils/masks';
 
 function PersonalInfoStep({ formData, onNext, onBack }) {
   const [localData, setLocalData] = useState({
@@ -17,7 +18,11 @@ function PersonalInfoStep({ formData, onNext, onBack }) {
   });
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    let { name, value } = e.target;
+    
+    if (name === 'cpf') value = maskCPF(value);
+    if (name === 'dataNascimento') value = maskDate(value);
+
     setLocalData(prev => ({ ...prev, [name]: value }));
   };
 
@@ -39,12 +44,12 @@ function PersonalInfoStep({ formData, onNext, onBack }) {
 
         <div className="form-group">
           <label>Qual é o seu CPF?</label>
-          <input type="text" className="form-control" name="cpf" value={localData.cpf} onChange={handleChange} placeholder="Digite acima seu CPF." />
+          <input type="text" className="form-control" name="cpf" value={localData.cpf} onChange={handleChange} placeholder="###.###.###-##" />
         </div>
 
         <div className="form-group">
           <label>Qual é a sua data de nascimento?</label>
-          <input type="date" className="form-control" name="dataNascimento" value={localData.dataNascimento} onChange={handleChange} />
+          <input type="text" className="form-control" name="dataNascimento" value={localData.dataNascimento} onChange={handleChange} placeholder="##/##/####" />
         </div>
 
         <div className="form-group">
