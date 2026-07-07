@@ -11,9 +11,18 @@ function UploadStep({ formData, onBack, onSubmit }) {
 
   const handleFileChange = (e, fieldName) => {
     if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      
+      // Limite de 10MB (Regra do Trello para Anexos Nativos e segurança do Cloudinary)
+      if (file.size > 10 * 1024 * 1024) {
+        alert('O arquivo selecionado é muito grande. O limite máximo é de 10MB por arquivo.');
+        e.target.value = ''; // Reseta o input
+        return;
+      }
+
       setFiles(prev => ({
         ...prev,
-        [fieldName]: e.target.files[0]
+        [fieldName]: file
       }));
     }
   };
@@ -90,6 +99,7 @@ function UploadStep({ formData, onBack, onSubmit }) {
           )}
           <input 
             type="file" 
+            accept=".pdf,.jpg,.jpeg,.png"
             onChange={(e) => handleFileChange(e, fieldName)}
             style={{ display: 'none' }} 
             disabled={isUploading}

@@ -1,7 +1,12 @@
 export default async function handler(req, res) {
-  // Configuração para CORS caso necessário
+  // Configuração para CORS (Segurança: Apenas ambiente local ou domínios da Vercel)
+  const origin = req.headers.origin;
+  if (origin && (origin.includes('localhost') || origin.includes('vercel.app'))) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', 'https://simples-admissao.vercel.app'); 
+  }
   res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
 
   if (req.method === 'OPTIONS') {
