@@ -49,8 +49,7 @@ function App() {
   return (
     <div className="app-container">
       <div className="logo-container">
-        <h1 className="logo-text">SIMPLES</h1>
-        <div className="logo-subtext">ASSESSORIA CONTÁBIL & EMPRESARIAL</div>
+        <img src="/logo.png" alt="Simples Assessoria Contábil" className="logo-image" style={{ maxWidth: '300px', width: '100%' }} />
       </div>
       
       <div className="form-card">
@@ -58,7 +57,7 @@ function App() {
         {currentStep === 1 && <PersonalInfoStep formData={formData} onNext={handleNext} onBack={handleBack} />}
         {currentStep === 2 && <AddressStep formData={formData} onNext={handleNext} onBack={handleBack} />}
         {currentStep === 3 && <ContractInfoStep formData={formData} onNext={handleNext} onBack={handleBack} />}
-        {currentStep === 4 && <UploadStep onBack={handleBack} onSubmit={handleSubmit} />}
+        {currentStep === 4 && <UploadStep formData={formData} onBack={handleBack} onSubmit={handleSubmit} />}
         {currentStep === 5 && <SuccessStep />}
       </div>
     </div>

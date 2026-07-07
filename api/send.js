@@ -55,6 +55,7 @@ export default async function handler(req, res) {
 - **Documento de Identificação:** ${data.fileUrls?.identificacao ? `[Baixar/Ver Arquivo](${data.fileUrls.identificacao})` : 'Não enviado'}
 - **Comprovante de Endereço:** ${data.fileUrls?.endereco ? `[Baixar/Ver Arquivo](${data.fileUrls.endereco})` : 'Não enviado'}
 - **Exame Admissional:** ${data.fileUrls?.exame ? `[Baixar/Ver Arquivo](${data.fileUrls.exame})` : 'Não enviado'}
+- **Documento dos Filhos:** ${data.fileUrls?.documentoFilhos ? `[Baixar/Ver Arquivo](${data.fileUrls.documentoFilhos})` : 'Não enviado'}
     `;
 
     // Cria o Cartão no Trello via API
@@ -80,7 +81,8 @@ export default async function handler(req, res) {
       const labels = {
         identificacao: "Doc de Identificação",
         endereco: "Comprovante de Endereço",
-        exame: "Exame Admissional"
+        exame: "Exame Admissional",
+        documentoFilhos: "Documento dos Filhos"
       };
 
       for (const [key, url] of Object.entries(data.fileUrls)) {

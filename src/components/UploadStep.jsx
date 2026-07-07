@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 
-function UploadStep({ onBack, onSubmit }) {
+function UploadStep({ formData, onBack, onSubmit }) {
   const [files, setFiles] = useState({
     identificacao: null,
     endereco: null,
-    exame: null
+    exame: null,
+    documentoFilhos: null
   });
   const [isUploading, setIsUploading] = useState(false);
 
@@ -108,6 +109,7 @@ function UploadStep({ onBack, onSubmit }) {
         {renderUploadArea('Documento de identificação com foto', 'identificacao')}
         {renderUploadArea('Comprovante de endereço', 'endereco')}
         {renderUploadArea('Exame admissional', 'exame')}
+        {formData?.temFilhos === 'Sim' && renderUploadArea('Documento de identificação dos filhos menores de 21 anos', 'documentoFilhos')}
       </div>
       <div className="step-footer">
         <button className="btn" onClick={onBack} disabled={isUploading}>Voltar</button>
