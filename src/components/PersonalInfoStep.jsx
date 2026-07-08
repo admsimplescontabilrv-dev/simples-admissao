@@ -50,7 +50,7 @@ function PersonalInfoStep({ formData, onNext, onBack }) {
       <div className="step-content">
         <div className="form-group">
           <label>Qual é seu nome completo?</label>
-          <input type="text" className="form-control" name="nome" value={localData.nome} onChange={handleChange} placeholder="Digite acima seu nome." />
+          <input type="text" className="form-control" name="nome" value={localData.nome} onChange={handleChange} placeholder="Digite seu nome." />
         </div>
 
         <div className="form-group">
@@ -65,12 +65,12 @@ function PersonalInfoStep({ formData, onNext, onBack }) {
 
         <div className="form-group">
           <label>Filiação Materna</label>
-          <input type="text" className="form-control" name="filiacaoMaterna" value={localData.filiacaoMaterna} onChange={handleChange} placeholder="Digite acima o nome da sua mãe." />
+          <input type="text" className="form-control" name="filiacaoMaterna" value={localData.filiacaoMaterna} onChange={handleChange} placeholder="Digite o nome da sua mãe." />
         </div>
 
         <div className="form-group">
           <label>Filiação Paterna</label>
-          <input type="text" className="form-control" name="filiacaoPaterna" value={localData.filiacaoPaterna} onChange={handleChange} placeholder="Digite acima o nome do seu pai. (se constar)" />
+          <input type="text" className="form-control" name="filiacaoPaterna" value={localData.filiacaoPaterna} onChange={handleChange} placeholder="Digite o nome do seu pai. (se constar)" />
         </div>
 
         <div className="form-group">

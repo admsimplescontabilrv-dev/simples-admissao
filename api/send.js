@@ -69,7 +69,7 @@ export default async function handler(req, res) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        name: `Nova Admissão: ${data.nome || 'Candidato'}`,
+        name: `Nova Admissão: ${data.empresa || 'Empresa não informada'} - ${data.nome || 'Candidato'}`,
         desc: desc,
         pos: 'top' // Coloca no topo da lista
       })

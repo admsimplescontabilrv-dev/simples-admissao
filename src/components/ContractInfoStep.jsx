@@ -27,12 +27,12 @@ function ContractInfoStep({ formData, onNext, onBack }) {
       <div className="step-content">
         <div className="form-group">
           <label>Qual empresa está te contratando?</label>
-          <input type="text" className="form-control" name="empresa" value={localData.empresa} onChange={handleChange} placeholder="Digite acima o nome da empresa." />
+          <input type="text" className="form-control" name="empresa" value={localData.empresa} onChange={handleChange} placeholder="Digite o nome da empresa." />
         </div>
 
         <div className="form-group">
-          <label>Você foi contratado para qual exercer qual função?</label>
-          <input type="text" className="form-control" name="cargo" value={localData.cargo} onChange={handleChange} placeholder="Digite acima seu cargo." />
+          <label>Você foi contratado para exercer qual função?</label>
+          <input type="text" className="form-control" name="cargo" value={localData.cargo} onChange={handleChange} placeholder="Digite seu cargo." />
         </div>
 
         <div className="form-group">
