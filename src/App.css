@@ -319,6 +319,18 @@ input.form-control::placeholder {
   background: linear-gradient(135deg, #1565C0, #0D47A1);
 }
 
+.error-text {
+  color: #ef4444;
+  font-size: 0.8rem;
+  margin-left: 0.5rem;
+  font-weight: 600;
+}
+
+.input-error {
+  border: 1px solid #ef4444 !important;
+  box-shadow: 0 0 0 1px #ef4444;
+}
+
 .form-row {
   display: flex;
   gap: 1rem;

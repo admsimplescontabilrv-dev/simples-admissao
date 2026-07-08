@@ -16,6 +16,7 @@ function PersonalInfoStep({ formData, onNext, onBack }) {
     grauInstrucao: formData.grauInstrucao || '',
     temFilhos: formData.temFilhos || ''
   });
+  const [errors, setErrors] = useState([]);
 
   const handleChange = (e) => {
     let { name, value } = e.target;
@@ -27,6 +28,9 @@ function PersonalInfoStep({ formData, onNext, onBack }) {
     if (e.target.type === 'text') value = value.toUpperCase();
 
     setLocalData(prev => ({ ...prev, [name]: value }));
+    if (errors.includes(name)) {
+      setErrors(prev => prev.filter(err => err !== name));
+    }
   };
 
   const handleNextClick = () => {
@@ -34,7 +38,8 @@ function PersonalInfoStep({ formData, onNext, onBack }) {
     const missingFields = requiredFields.filter(field => !localData[field]);
     
     if (missingFields.length > 0) {
-      alert('Por favor, preencha os campos obrigatórios:\n- Sexo\n- Raça/Cor\n- Estado Civil\n- Grau de instrução\n- Filhos/dependentes');
+      setErrors(missingFields);
+      alert('Por favor, preencha os campos obrigatórios em destaque vermelho.');
       return;
     }
 
@@ -84,8 +89,11 @@ function PersonalInfoStep({ formData, onNext, onBack }) {
         </div>
 
         <div className="form-group">
-          <label>Qual é o seu sexo?</label>
-          <select className="form-control" name="sexo" value={localData.sexo} onChange={handleChange}>
+          <label>
+            Qual é o seu sexo?
+            {errors.includes('sexo') && <span className="error-text">* Obrigatório</span>}
+          </label>
+          <select className={`form-control ${errors.includes('sexo') ? 'input-error' : ''}`} name="sexo" value={localData.sexo} onChange={handleChange}>
             <option value="">Favor selecionar</option>
             <option value="Masculino">Masculino</option>
             <option value="Feminino">Feminino</option>
@@ -93,8 +101,11 @@ function PersonalInfoStep({ formData, onNext, onBack }) {
         </div>
 
         <div className="form-group">
-          <label>Qual é sua raça/cor?</label>
-          <select className="form-control" name="raca" value={localData.raca} onChange={handleChange}>
+          <label>
+            Qual é sua raça/cor?
+            {errors.includes('raca') && <span className="error-text">* Obrigatório</span>}
+          </label>
+          <select className={`form-control ${errors.includes('raca') ? 'input-error' : ''}`} name="raca" value={localData.raca} onChange={handleChange}>
             <option value="">Favor selecionar</option>
             <option value="Indígena">Indígena</option>
             <option value="Branca">Branca</option>
@@ -105,8 +116,11 @@ function PersonalInfoStep({ formData, onNext, onBack }) {
         </div>
 
         <div className="form-group">
-          <label>Qual é o seu Estado Civil?</label>
-          <select className="form-control" name="estadoCivil" value={localData.estadoCivil} onChange={handleChange}>
+          <label>
+            Qual é o seu Estado Civil?
+            {errors.includes('estadoCivil') && <span className="error-text">* Obrigatório</span>}
+          </label>
+          <select className={`form-control ${errors.includes('estadoCivil') ? 'input-error' : ''}`} name="estadoCivil" value={localData.estadoCivil} onChange={handleChange}>
             <option value="">Favor selecionar</option>
             <option value="Solteiro(a)">Solteiro(a)</option>
             <option value="Casado(a)">Casado(a)</option>
@@ -119,8 +133,11 @@ function PersonalInfoStep({ formData, onNext, onBack }) {
         </div>
 
         <div className="form-group">
-          <label>Qual é o seu Grau de instrução</label>
-          <select className="form-control" name="grauInstrucao" value={localData.grauInstrucao} onChange={handleChange}>
+          <label>
+            Qual é o seu Grau de instrução
+            {errors.includes('grauInstrucao') && <span className="error-text">* Obrigatório</span>}
+          </label>
+          <select className={`form-control ${errors.includes('grauInstrucao') ? 'input-error' : ''}`} name="grauInstrucao" value={localData.grauInstrucao} onChange={handleChange}>
             <option value="">Favor selecionar</option>
             <option value="Analfabeto">Analfabeto</option>
             <option value="Ensino Fundamental até 5º Incompleto">Ensino Fundamental até 5º Incompleto</option>
@@ -139,7 +156,10 @@ function PersonalInfoStep({ formData, onNext, onBack }) {
         </div>
 
         <div className="form-group">
-          <label>Você possui filhos/dependentes com menos de 21 anos?</label>
+          <label>
+            Você possui filhos/dependentes com menos de 21 anos?
+            {errors.includes('temFilhos') && <span className="error-text">* Obrigatório</span>}
+          </label>
           <div className="radio-group">
             <label className="radio-label">
               <input type="radio" name="temFilhos" value="Sim" checked={localData.temFilhos === 'Sim'} onChange={handleChange} />
