@@ -42,7 +42,7 @@ function AddressStep({ formData, onNext, onBack }) {
           <input type="text" className="form-control" name="logradouro" value={localData.logradouro} onChange={handleChange} placeholder="EX: Rua / Avenida" />
         </div>
 
-        <div style={{ display: 'flex', gap: '1rem' }}>
+        <div className="form-row">
             <div className="form-group" style={{ flex: 1 }}>
               <label>Número</label>
               <input type="text" className="form-control" name="numero" value={localData.numero} onChange={handleChange} />
@@ -58,7 +58,7 @@ function AddressStep({ formData, onNext, onBack }) {
           <input type="text" className="form-control" name="bairro" value={localData.bairro} onChange={handleChange} />
         </div>
 
-        <div style={{ display: 'flex', gap: '1rem' }}>
+        <div className="form-row">
             <div className="form-group" style={{ flex: 2 }}>
               <label>Cidade</label>
               <input type="text" className="form-control" name="cidade" value={localData.cidade} onChange={handleChange} />
