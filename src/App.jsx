@@ -7,7 +7,6 @@ import ContractInfoStep from './components/ContractInfoStep';
 import UploadStep from './components/UploadStep';
 import ReviewStep from './components/ReviewStep';
 import SuccessStep from './components/SuccessStep';
-import { generateAdmissionPDF } from './utils/pdfGenerator';
 
 function App() {
   const [currentStep, setCurrentStep] = useState(0);
@@ -84,6 +83,7 @@ function App() {
 
       // 2. Gera o PDF com todos os dados
       const completeData = { ...formData, fileUrls };
+      const { generateAdmissionPDF } = await import('./utils/pdfGenerator.js');
       const { blob } = await generateAdmissionPDF(completeData);
       setPdfBlob(blob);
 
