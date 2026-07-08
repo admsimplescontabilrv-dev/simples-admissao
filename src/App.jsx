@@ -95,6 +95,10 @@ function App() {
       );
       const pdfUrl = await uploadToCloudinary(pdfFile);
 
+      // Aguarda 5 segundos para o Cloudinary processar completamente os arquivos
+      // antes de criar o cartão no Trello, evitando que cheguem vazios.
+      await new Promise(resolve => setTimeout(resolve, 5000));
+
       // 4. Envia dados + URLs para a API (cria cartão no Trello)
       const { files: _files, ...dataWithoutFiles } = formData;
       const response = await fetch('/api/send', {

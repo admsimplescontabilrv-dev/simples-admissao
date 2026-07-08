@@ -80,53 +80,41 @@ export default async function handler(req, res) {
     }
 
     const cardData = await response.json();
-    const cardId = cardData.id;
+    // O delay de 5 segundos agora acontece no Frontend (App.jsx) antes de chegar aqui.
 
-    // Atraso de 5 segundos para garantir que o Cloudinary tenha processado totalmente os arquivos e o PDF
-    await new Promise(resolve => setTimeout(resolve, 5000));
-
-    // Helper para anexar arquivos de forma NATIVA baixando do Cloudinary e enviando como FormData
-    const attachNativeFile = async (url, name) => {
-      try {
-        const fileRes = await fetch(url);
-        if (!fileRes.ok) throw new Error(`Erro ao baixar: ${url}`);
-        const blob = await fileRes.blob();
-        
-        const fd = new FormData();
-        fd.append('file', blob, name);
-        fd.append('name', name);
-        
-        await fetch(`https://api.trello.com/1/cards/${cardId}/attachments?key=${trelloKey}&token=${trelloToken}`, {
-          method: 'POST',
-          body: fd
-        });
-      } catch (err) {
-        console.error('Falha ao anexar arquivo nativamente:', name, err);
-      }
-    };
-
-    // Se houver arquivos, anexa nativamente no Trello para criar capas e miniaturas!
+    // Se houver arquivos, anexa no Trello via URL (o próprio Trello faz o download da URL)
     if (data.fileUrls) {
       const labels = {
-        identificacao: "Doc_Identificacao",
-        endereco: "Comprovante_Endereco",
-        exame: "Exame_Admissional",
-        documentoFilhos: "Documento_Filhos"
+        identificacao: "Doc de Identificação",
+        endereco: "Comprovante de Endereço",
+        exame: "Exame Admissional",
+        documentoFilhos: "Documento dos Filhos"
       };
 
       for (const [key, url] of Object.entries(data.fileUrls)) {
         if (url) {
-          // Extrai a extensão da URL (ex: jpg, png, pdf) ou assume jpg
-          const extension = url.split('.').pop().split(/#|\?/)[0] || 'jpg';
-          const filename = `${labels[key] || key}.${extension}`;
-          await attachNativeFile(url, filename);
+          await fetch(`https://api.trello.com/1/cards/${cardId}/attachments?key=${trelloKey}&token=${trelloToken}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: labels[key] || key,
+              url: url
+            })
+          });
         }
       }
     }
 
-    // Anexa o PDF da ficha de admissão ao cartão do Trello nativamente
+    // Anexa o PDF da ficha de admissão ao cartão do Trello via URL
     if (data.pdfUrl) {
-      await attachNativeFile(data.pdfUrl, `Ficha_de_Admissao_${(data.nome || 'Candidato').replace(/\s+/g, '_')}.pdf`);
+      await fetch(`https://api.trello.com/1/cards/${cardId}/attachments?key=${trelloKey}&token=${trelloToken}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: `Ficha de Admissão - ${data.nome || 'Candidato'}.pdf`,
+          url: data.pdfUrl
+        })
+      });
     }
 
     return res.status(200).json({ success: true });
