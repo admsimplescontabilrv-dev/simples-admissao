@@ -80,6 +80,7 @@ export default async function handler(req, res) {
     }
 
     const cardData = await response.json();
+    const cardId = cardData.id;
     // O delay de 5 segundos agora acontece no Frontend (App.jsx) antes de chegar aqui.
 
     // Se houver arquivos, anexa no Trello via URL (o próprio Trello faz o download da URL)
