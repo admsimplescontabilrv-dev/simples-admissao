@@ -59,6 +59,25 @@ function WelcomeStep({ onNext }) {
             </div>
           ))}
         </div>
+        <div style={{ 
+          background: 'rgba(59,130,246,0.08)', 
+          borderRadius: '8px', 
+          padding: '1rem 1.25rem',
+          border: '1px solid rgba(59,130,246,0.2)',
+          display: 'flex',
+          gap: '0.75rem',
+          alignItems: 'flex-start'
+        }}>
+          <span style={{ fontSize: '1.2rem', flexShrink: 0, marginTop: '1px' }}>ℹ️</span>
+          <p style={{ 
+            fontSize: '0.82rem', 
+            color: '#b0c4de',
+            margin: 0,
+            lineHeight: '1.5'
+          }}>
+            Caso não tenha alguma das informações solicitadas no momento, <strong style={{ color: '#93bbf5' }}>pode deixar em branco</strong>. Nós validamos tudo diretamente com a empresa.
+          </p>
+        </div>
         <p style={{ 
           textAlign: 'center', 
           fontSize: '0.8rem', 

@@ -1,6 +1,18 @@
 import React from 'react';
 
-function SuccessStep() {
+function SuccessStep({ pdfBlob, nomeColaborador }) {
+  const handleDownloadPDF = () => {
+    if (!pdfBlob) return;
+    const url = URL.createObjectURL(pdfBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Ficha_Admissao_${(nomeColaborador || 'Candidato').replace(/\s+/g, '_')}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <>
       <div className="step-header">
@@ -8,7 +20,18 @@ function SuccessStep() {
         <p>Recebemos as suas informações com sucesso.</p>
       </div>
       <div className="step-content" style={{ textAlign: 'center', minHeight: '200px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-        <p style={{ marginBottom: '2rem' }}>O seu processo de admissão já foi iniciado.</p>
+        <p style={{ marginBottom: '1rem' }}>O seu processo de admissão já foi iniciado.</p>
+        
+        {pdfBlob && (
+          <button 
+            className="btn btn-download-pdf"
+            onClick={handleDownloadPDF}
+            style={{ marginBottom: '1.5rem' }}
+          >
+            📥 Baixar Comprovante em PDF
+          </button>
+        )}
+
         <p style={{ fontSize: '0.9rem', color: '#ccc' }}>Se tiver alguma dúvida, entre em contato com o nosso Departamento Pessoal:</p>
         <a 
           href="https://wa.me/556436216798" 

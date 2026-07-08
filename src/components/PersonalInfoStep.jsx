@@ -23,6 +23,9 @@ function PersonalInfoStep({ formData, onNext, onBack }) {
     if (name === 'cpf') value = maskCPF(value);
     if (name === 'dataNascimento') value = maskDate(value);
 
+    // Transforma em maiúsculo apenas inputs de texto (não selects/radios)
+    if (e.target.type === 'text') value = value.toUpperCase();
+
     setLocalData(prev => ({ ...prev, [name]: value }));
   };
 

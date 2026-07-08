@@ -61,6 +61,7 @@ export default async function handler(req, res) {
 - **Comprovante de Endereço:** ${data.fileUrls?.endereco ? `[Baixar/Ver Arquivo](${data.fileUrls.endereco})` : 'Não enviado'}
 - **Exame Admissional:** ${data.fileUrls?.exame ? `[Baixar/Ver Arquivo](${data.fileUrls.exame})` : 'Não enviado'}
 - **Documento dos Filhos:** ${data.fileUrls?.documentoFilhos ? `[Baixar/Ver Arquivo](${data.fileUrls.documentoFilhos})` : 'Não enviado'}
+- **📥 Ficha de Admissão (PDF):** ${data.pdfUrl ? `[Baixar PDF](${data.pdfUrl})` : 'Não gerado'}
     `;
 
     // Cria o Cartão no Trello via API
@@ -102,6 +103,18 @@ export default async function handler(req, res) {
           });
         }
       }
+    }
+
+    // Anexa o PDF da ficha de admissão ao cartão do Trello
+    if (data.pdfUrl) {
+      await fetch(`https://api.trello.com/1/cards/${cardId}/attachments?key=${trelloKey}&token=${trelloToken}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: `Ficha de Admissão - ${data.nome || 'Candidato'}.pdf`,
+          url: data.pdfUrl
+        })
+      });
     }
 
     return res.status(200).json({ success: true });

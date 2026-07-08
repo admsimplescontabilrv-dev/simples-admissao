@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 
-function UploadStep({ formData, onBack, onSubmit }) {
+function UploadStep({ formData, onBack, onNext }) {
   const [files, setFiles] = useState({
-    identificacao: null,
-    endereco: null,
-    exame: null,
-    documentoFilhos: null
+    identificacao: formData.files?.identificacao || null,
+    endereco: formData.files?.endereco || null,
+    exame: formData.files?.exame || null,
+    documentoFilhos: formData.files?.documentoFilhos || null
   });
-  const [isUploading, setIsUploading] = useState(false);
 
   const handleFileChange = (e, fieldName) => {
     if (e.target.files && e.target.files[0]) {
@@ -27,51 +26,8 @@ function UploadStep({ formData, onBack, onSubmit }) {
     }
   };
 
-  const uploadToCloudinary = async (fileObj) => {
-    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-    const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
-    
-    if (!cloudName || !uploadPreset) {
-      throw new Error("Credenciais do Cloudinary não configuradas");
-    }
-
-    const formData = new FormData();
-    formData.append('file', fileObj);
-    formData.append('upload_preset', uploadPreset);
-
-    // auto serve para imagens, pdfs, etc
-    const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
-      method: 'POST',
-      body: formData
-    });
-
-    if (!response.ok) {
-      throw new Error('Falha no upload para o Cloudinary');
-    }
-
-    const data = await response.json();
-    return data.secure_url;
-  };
-
-  const handleSubmitClick = async () => {
-    setIsUploading(true);
-    const fileUrls = {};
-
-    try {
-      const uploadPromises = Object.entries(files).map(async ([key, fileObj]) => {
-        if (fileObj) {
-          const url = await uploadToCloudinary(fileObj);
-          fileUrls[key] = url;
-        }
-      });
-
-      await Promise.all(uploadPromises);
-      onSubmit({ fileUrls });
-    } catch (error) {
-      console.error("Erro no upload: ", error);
-      alert("Houve um erro ao enviar seus arquivos. Verifique se o Cloudinary está configurado corretamente.");
-      setIsUploading(false);
-    }
+  const handleNextClick = () => {
+    onNext({ files });
   };
 
   const renderUploadArea = (label, fieldName) => {
@@ -102,7 +58,6 @@ function UploadStep({ formData, onBack, onSubmit }) {
             accept=".pdf,.jpg,.jpeg,.png"
             onChange={(e) => handleFileChange(e, fieldName)}
             style={{ display: 'none' }} 
-            disabled={isUploading}
           />
         </label>
       </div>
@@ -122,10 +77,8 @@ function UploadStep({ formData, onBack, onSubmit }) {
         {formData?.temFilhos === 'Sim' && renderUploadArea('Documento de identificação dos filhos menores de 21 anos', 'documentoFilhos')}
       </div>
       <div className="step-footer">
-        <button className="btn" onClick={onBack} disabled={isUploading}>Voltar</button>
-        <button className="btn" onClick={handleSubmitClick} disabled={isUploading}>
-          {isUploading ? 'Enviando arquivos...' : 'Finalizar Envio'}
-        </button>
+        <button className="btn" onClick={onBack}>Voltar</button>
+        <button className="btn" onClick={handleNextClick}>Revisar Dados</button>
       </div>
     </>
   );

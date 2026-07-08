@@ -9,7 +9,8 @@ function ContractInfoStep({ formData, onNext, onBack }) {
   });
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    let { name, value } = e.target;
+    value = value.toUpperCase();
     setLocalData(prev => ({ ...prev, [name]: value }));
   };
 

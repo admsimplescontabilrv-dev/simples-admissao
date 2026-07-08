@@ -16,6 +16,7 @@ function AddressStep({ formData, onNext, onBack }) {
     let { name, value } = e.target;
 
     if (name === 'cep') value = maskCEP(value);
+    value = value.toUpperCase();
 
     setLocalData(prev => ({ ...prev, [name]: value }));
   };
