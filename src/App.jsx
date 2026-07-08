@@ -84,7 +84,7 @@ function App() {
 
       // 2. Gera o PDF com todos os dados
       const completeData = { ...formData, fileUrls };
-      const { blob } = generateAdmissionPDF(completeData);
+      const { blob } = await generateAdmissionPDF(completeData);
       setPdfBlob(blob);
 
       // 3. Upload do PDF para o Cloudinary

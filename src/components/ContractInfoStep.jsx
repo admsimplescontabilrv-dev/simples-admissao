@@ -37,7 +37,7 @@ function ContractInfoStep({ formData, onNext, onBack }) {
 
         <div className="form-group">
           <label>Qual foi o salário combinado?</label>
-          <input type="text" className="form-control" name="salario" value={localData.salario} onChange={handleChange} placeholder="R$ 0,00" />
+          <input type="text" className="form-control" name="salario" value={localData.salario} onChange={handleChange} placeholder="Ex: 1 Salário + Comissão, R$ 2.000,00..." />
         </div>
 
         <div className="form-group">

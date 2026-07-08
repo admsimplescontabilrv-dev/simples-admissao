@@ -5,7 +5,7 @@ import { jsPDF } from 'jspdf';
  * @param {Object} data - Dados completos do formulário (formData)
  * @returns {{ blob: Blob, base64: string }} - O PDF como Blob (para download) e base64 (para API)
  */
-export function generateAdmissionPDF(data) {
+export async function generateAdmissionPDF(data) {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 20;
@@ -21,35 +21,50 @@ export function generateAdmissionPDF(data) {
   };
 
   // ========== CABEÇALHO ==========
-  doc.setFillColor(30, 30, 40);
-  doc.rect(0, 0, pageWidth, 42, 'F');
+  try {
+    const res = await fetch('/logo.png');
+    if (res.ok) {
+      const blob = await res.blob();
+      const base64 = await new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.readAsDataURL(blob);
+      });
+      const img = new Image();
+      img.src = base64;
+      await new Promise(resolve => img.onload = resolve);
+      
+      const imgWidth = 50; // Largura da logo em mm
+      const imgHeight = (img.height * imgWidth) / img.width;
+      doc.addImage(base64, 'PNG', (pageWidth - imgWidth) / 2, y, imgWidth, imgHeight);
+      y += imgHeight + 10;
+    }
+  } catch (e) {
+    console.error('Falha ao carregar logo no PDF', e);
+  }
 
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(18);
-  doc.setTextColor(255, 255, 255);
-  doc.text('Simples Assessoria Contábil', pageWidth / 2, 18, { align: 'center' });
-
-  doc.setFontSize(11);
-  doc.setTextColor(200, 200, 200);
-  doc.text('Ficha de Admissão', pageWidth / 2, 27, { align: 'center' });
+  doc.setFontSize(14);
+  doc.setTextColor(30, 30, 40);
+  doc.text('FICHA DE ADMISSÃO', pageWidth / 2, y, { align: 'center' });
 
   doc.setFontSize(8);
   doc.setTextColor(150, 150, 150);
   const now = new Date();
   const dateStr = now.toLocaleDateString('pt-BR') + ' às ' + now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-  doc.text(`Gerado em: ${dateStr}`, pageWidth / 2, 35, { align: 'center' });
+  doc.text(`Gerado em: ${dateStr}`, pageWidth / 2, y + 6, { align: 'center' });
 
-  y = 52;
+  y += 18;
 
   // ========== HELPER: Seção ==========
-  const drawSection = (title, icon) => {
+  const drawSection = (title) => {
     checkPage(20);
     doc.setFillColor(45, 45, 60);
     doc.roundedRect(margin, y, contentWidth, 9, 2, 2, 'F');
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(11);
     doc.setTextColor(255, 255, 255);
-    doc.text(`${icon}  ${title}`, margin + 4, y + 6.5);
+    doc.text(title, margin + 4, y + 6.5);
     y += 14;
   };
 
@@ -104,7 +119,7 @@ export function generateAdmissionPDF(data) {
   };
 
   // ========== SEÇÃO 1: DADOS PESSOAIS ==========
-  drawSection('DADOS PESSOAIS', '📝');
+  drawSection('DADOS PESSOAIS');
   drawField('Nome Completo', data.nome);
   drawFieldDouble('CPF', data.cpf, 'Data de Nascimento', data.dataNascimento);
   drawFieldDouble('Filiação Materna', data.filiacaoMaterna, 'Filiação Paterna', data.filiacaoPaterna);
@@ -117,20 +132,20 @@ export function generateAdmissionPDF(data) {
   }
 
   // ========== SEÇÃO 2: ENDEREÇO ==========
-  drawSection('ENDEREÇO', '🏠');
+  drawSection('ENDEREÇO');
   drawField('CEP', data.cep);
   drawField('Logradouro', data.logradouro);
   drawFieldDouble('Número', data.numero, 'Complemento', data.complemento);
   drawFieldDouble('Bairro', data.bairro, 'Cidade / Estado', `${data.cidade || '—'} / ${data.estado || '—'}`);
 
   // ========== SEÇÃO 3: CONTRATAÇÃO ==========
-  drawSection('INFORMAÇÕES DA CONTRATAÇÃO', '💼');
+  drawSection('INFORMAÇÕES DA CONTRATAÇÃO');
   drawField('Empresa Contratante', data.empresa);
   drawField('Cargo / Função', data.cargo);
   drawFieldDouble('Salário Combinado', data.salario, 'Carga Horária', data.cargaHoraria);
 
   // ========== SEÇÃO 4: DOCUMENTOS ==========
-  drawSection('DOCUMENTOS ANEXADOS', '📄');
+  drawSection('DOCUMENTOS ANEXADOS');
   const docLabels = {
     identificacao: 'Documento de Identificação',
     endereco: 'Comprovante de Endereço',
