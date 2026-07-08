@@ -85,29 +85,28 @@ export default async function handler(req, res) {
 
     const attachmentPromises = [];
 
-    // Função auxiliar para anexar arquivo
-    const attachFileToTrello = async (fileUrl, filename) => {
+    // Função auxiliar para anexar arquivo de forma nativa igual à versão anterior que funcionava
+    const attachNativeFile = async (fileUrl, name) => {
       try {
-        const fileResp = await fetch(fileUrl);
-        if (!fileResp.ok) throw new Error(`Falha ao baixar do Cloudinary: ${fileResp.status}`);
-        const fileBlob = await fileResp.blob();
-
-        const formData = new FormData();
-        formData.append('key', trelloKey);
-        formData.append('token', trelloToken);
-        formData.append('file', fileBlob, filename);
-        formData.append('setCover', 'false');
-
-        const attachResp = await fetch(`https://api.trello.com/1/cards/${cardId}/attachments`, {
+        const fileRes = await fetch(fileUrl);
+        if (!fileRes.ok) throw new Error(`Erro ao baixar: ${fileUrl}`);
+        const blob = await fileRes.blob();
+        
+        const fd = new FormData();
+        fd.append('file', blob, name);
+        fd.append('name', name);
+        fd.append('setCover', 'false'); // Impede capa automática
+        
+        const attachResp = await fetch(`https://api.trello.com/1/cards/${cardId}/attachments?key=${trelloKey}&token=${trelloToken}`, {
           method: 'POST',
-          body: formData
+          body: fd
         });
 
         if (!attachResp.ok) {
-          console.error(`Erro ao anexar ${filename} no Trello. Status: ${attachResp.status}`);
+          console.error(`Erro ao anexar ${name} no Trello. Status: ${attachResp.status}`);
         }
       } catch (err) {
-        console.error(`Erro ao anexar ${filename}:`, err);
+        console.error(`Falha ao anexar arquivo nativamente:`, name, err);
       }
     };
 
@@ -128,14 +127,14 @@ export default async function handler(req, res) {
             extension = 'jpg';
           }
           const filename = `${labels[key] || key}.${extension}`;
-          attachmentPromises.push(attachFileToTrello(url, filename));
+          attachmentPromises.push(attachNativeFile(url, filename));
         }
       }
     }
 
     if (data.pdfUrl) {
       const pdfFilename = `Ficha de Admissão - ${data.nome || 'Candidato'}.pdf`;
-      attachmentPromises.push(attachFileToTrello(data.pdfUrl, pdfFilename));
+      attachmentPromises.push(attachNativeFile(data.pdfUrl, pdfFilename));
     }
 
     // Aguarda todos os anexos serem enviados simultaneamente
