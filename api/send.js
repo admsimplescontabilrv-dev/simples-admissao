@@ -85,28 +85,48 @@ export default async function handler(req, res) {
 
     const attachmentPromises = [];
 
-    // Função auxiliar para anexar arquivo de forma nativa igual à versão anterior que funcionava
-    const attachNativeFile = async (fileUrl, name) => {
-      try {
-        const fileRes = await fetch(fileUrl);
-        if (!fileRes.ok) throw new Error(`Erro ao baixar: ${fileUrl}`);
-        const blob = await fileRes.blob();
-        
-        const fd = new FormData();
-        fd.append('file', blob, name);
-        fd.append('name', name);
-        fd.append('setCover', 'false'); // Impede capa automática
-        
-        const attachResp = await fetch(`https://api.trello.com/1/cards/${cardId}/attachments?key=${trelloKey}&token=${trelloToken}`, {
-          method: 'POST',
-          body: fd
-        });
+    // Função auxiliar para anexar arquivo de forma nativa, com retry
+    // (o Cloudinary às vezes demora a liberar o arquivo / bloqueia PDF por padrão)
+    const attachNativeFile = async (fileUrl, name, tentativas = 3) => {
+      for (let i = 1; i <= tentativas; i++) {
+        try {
+          const fileRes = await fetch(fileUrl);
+          if (!fileRes.ok) {
+            throw new Error(`Erro ao baixar (status ${fileRes.status}): ${fileUrl}`);
+          }
+          const blob = await fileRes.blob();
 
-        if (!attachResp.ok) {
-          console.error(`Erro ao anexar ${name} no Trello. Status: ${attachResp.status}`);
+          const fd = new FormData();
+          fd.append('file', blob, name);
+          fd.append('name', name);
+          fd.append('setCover', 'false'); // Impede capa automática
+
+          const attachResp = await fetch(`https://api.trello.com/1/cards/${cardId}/attachments?key=${trelloKey}&token=${trelloToken}`, {
+            method: 'POST',
+            body: fd
+          });
+
+          if (!attachResp.ok) {
+            throw new Error(`Trello recusou o anexo ${name}. Status: ${attachResp.status}`);
+          }
+
+          return; // sucesso, sai da função
+        } catch (err) {
+          console.error(`Tentativa ${i}/${tentativas} falhou ao anexar "${name}":`, err.message);
+          if (i === tentativas) {
+            try {
+              await fetch(`https://api.trello.com/1/cards/${cardId}/actions/comments?key=${trelloKey}&token=${trelloToken}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  text: `⚠️ Falha ao anexar nativamente "${name}" após ${tentativas} tentativas. Verifique se o arquivo está acessível: ${fileUrl}`
+                })
+              });
+            } catch (_) { /* se nem o comentário funcionar, ignora */ }
+          } else {
+            await new Promise(r => setTimeout(r, 1500)); // espera antes de tentar de novo
+          }
         }
-      } catch (err) {
-        console.error(`Falha ao anexar arquivo nativamente:`, name, err);
       }
     };
 
