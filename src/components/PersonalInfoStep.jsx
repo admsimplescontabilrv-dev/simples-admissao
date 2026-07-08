@@ -30,6 +30,14 @@ function PersonalInfoStep({ formData, onNext, onBack }) {
   };
 
   const handleNextClick = () => {
+    const requiredFields = ['sexo', 'raca', 'estadoCivil', 'grauInstrucao', 'temFilhos'];
+    const missingFields = requiredFields.filter(field => !localData[field]);
+    
+    if (missingFields.length > 0) {
+      alert('Por favor, preencha os campos obrigatórios:\n- Sexo\n- Raça/Cor\n- Estado Civil\n- Grau de instrução\n- Filhos/dependentes');
+      return;
+    }
+
     onNext(localData);
   };
 
@@ -100,11 +108,13 @@ function PersonalInfoStep({ formData, onNext, onBack }) {
           <label>Qual é o seu Estado Civil?</label>
           <select className="form-control" name="estadoCivil" value={localData.estadoCivil} onChange={handleChange}>
             <option value="">Favor selecionar</option>
-            <option value="SOLTEIRO(A)">SOLTEIRO (A)</option>
-            <option value="CASADO(A)">CASADO (A)</option>
-            <option value="VIÚVO(A)">VIÚVO (A)</option>
-            <option value="DIVORCIADO(A)">DIVORCIADO (A)</option>
-            <option value="UNIÃO ESTAVEL">UNIÃO ESTAVEL</option>
+            <option value="Solteiro(a)">Solteiro(a)</option>
+            <option value="Casado(a)">Casado(a)</option>
+            <option value="Viúvo(a)">Viúvo(a)</option>
+            <option value="Divorciado(a)">Divorciado(a)</option>
+            <option value="Concubinato(a)">Concubinato(a)</option>
+            <option value="Separado(a) Judicialmente">Separado(a) Judicialmente</option>
+            <option value="União Estável">União Estável</option>
           </select>
         </div>
 
@@ -112,10 +122,19 @@ function PersonalInfoStep({ formData, onNext, onBack }) {
           <label>Qual é o seu Grau de instrução</label>
           <select className="form-control" name="grauInstrucao" value={localData.grauInstrucao} onChange={handleChange}>
             <option value="">Favor selecionar</option>
-            <option value="ENSINO MÉDIO COMPLETO">ENSINO MÉDIO COMPLETO</option>
-            <option value="SUPERIOR INCOMPLETO">SUPERIOR INCOMPLETO</option>
-            <option value="SUPERIOR COMPLETO">SUPERIOR COMPLETO</option>
-            {/* Adicionar mais opções conforme necessário */}
+            <option value="Analfabeto">Analfabeto</option>
+            <option value="Ensino Fundamental até 5º Incompleto">Ensino Fundamental até 5º Incompleto</option>
+            <option value="Ensino Fundamental 5º Completo">Ensino Fundamental 5º Completo</option>
+            <option value="Ensino Fundamental 6º ao 9º">Ensino Fundamental 6º ao 9º</option>
+            <option value="Ensino Fundamental Completo">Ensino Fundamental Completo</option>
+            <option value="Ensino Médio Incompleto">Ensino Médio Incompleto</option>
+            <option value="Ensino Médio Completo">Ensino Médio Completo</option>
+            <option value="Superior Incompleto">Superior Incompleto</option>
+            <option value="Superior Completo">Superior Completo</option>
+            <option value="Pós-Graduação">Pós-Graduação</option>
+            <option value="Mestrado">Mestrado</option>
+            <option value="Doutorado">Doutorado</option>
+            <option value="Ph. D">Ph. D</option>
           </select>
         </div>
 

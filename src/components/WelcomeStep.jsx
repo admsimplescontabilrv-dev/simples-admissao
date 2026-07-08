@@ -32,33 +32,7 @@ function WelcomeStep({ onNext }) {
             <li>✔️ CPF e dados pessoais</li>
           </ul>
         </div>
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          gap: '2rem',
-          flexWrap: 'wrap',
-          padding: '0.5rem 0'
-        }}>
-          {[
-            { icon: '📝', label: 'Dados Pessoais' },
-            { icon: '🏠', label: 'Endereço' },
-            { icon: '💼', label: 'Contratação' },
-            { icon: '📄', label: 'Documentos' }
-          ].map((step, i) => (
-            <div key={i} style={{ 
-              textAlign: 'center', 
-              fontSize: '0.8rem', 
-              color: '#aaa',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '0.3rem'
-            }}>
-              <span style={{ fontSize: '1.5rem' }}>{step.icon}</span>
-              <span>{step.label}</span>
-            </div>
-          ))}
-        </div>
+
         <div style={{ 
           background: 'rgba(59,130,246,0.08)', 
           borderRadius: '8px', 

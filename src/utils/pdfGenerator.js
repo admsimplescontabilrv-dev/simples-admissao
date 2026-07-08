@@ -55,7 +55,7 @@ export function generateAdmissionPDF(data) {
 
   // ========== HELPER: Campo ==========
   const drawField = (label, value) => {
-    checkPage(10);
+    checkPage(15);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     doc.setTextColor(120, 120, 130);
@@ -63,16 +63,20 @@ export function generateAdmissionPDF(data) {
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(10);
     doc.setTextColor(50, 50, 60);
-    doc.text(value || '—', margin + 2, y + 5);
+    
+    const splitText = doc.splitTextToSize(value || '—', contentWidth - 4);
+    doc.text(splitText, margin + 2, y + 5);
+    const textHeight = splitText.length * 4.5; // height per line
+    
     // Linha separadora
     doc.setDrawColor(230, 230, 235);
-    doc.line(margin + 2, y + 8, margin + contentWidth - 2, y + 8);
-    y += 12;
+    doc.line(margin + 2, y + 2 + textHeight, margin + contentWidth - 2, y + 2 + textHeight);
+    y += 7 + textHeight;
   };
 
   // ========== HELPER: Campo duplo ==========
   const drawFieldDouble = (label1, value1, label2, value2) => {
-    checkPage(10);
+    checkPage(15);
     const halfWidth = contentWidth / 2;
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
@@ -82,11 +86,21 @@ export function generateAdmissionPDF(data) {
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(10);
     doc.setTextColor(50, 50, 60);
-    doc.text(value1 || '—', margin + 2, y + 5);
-    doc.text(value2 || '—', margin + halfWidth + 2, y + 5);
+    
+    const splitText1 = doc.splitTextToSize(value1 || '—', halfWidth - 4);
+    const splitText2 = doc.splitTextToSize(value2 || '—', halfWidth - 4);
+    
+    doc.text(splitText1, margin + 2, y + 5);
+    doc.text(splitText2, margin + halfWidth + 2, y + 5);
+    
+    const lines1 = splitText1.length;
+    const lines2 = splitText2.length;
+    const maxLines = Math.max(lines1, lines2);
+    const textHeight = maxLines * 4.5;
+    
     doc.setDrawColor(230, 230, 235);
-    doc.line(margin + 2, y + 8, margin + contentWidth - 2, y + 8);
-    y += 12;
+    doc.line(margin + 2, y + 2 + textHeight, margin + contentWidth - 2, y + 2 + textHeight);
+    y += 7 + textHeight;
   };
 
   // ========== SEÇÃO 1: DADOS PESSOAIS ==========
@@ -97,7 +111,10 @@ export function generateAdmissionPDF(data) {
   drawFieldDouble('Nacionalidade', data.nacionalidade, 'Naturalidade', data.naturalidade);
   drawFieldDouble('Sexo', data.sexo, 'Raça/Cor', data.raca);
   drawFieldDouble('Estado Civil', data.estadoCivil, 'Grau de Instrução', data.grauInstrucao);
-  drawField('Possui filhos/dependentes < 21 anos', data.temFilhos);
+  
+  if (data.temFilhos === 'Sim') {
+    drawField('Possui filhos/dependentes < 21 anos', data.temFilhos);
+  }
 
   // ========== SEÇÃO 2: ENDEREÇO ==========
   drawSection('ENDEREÇO', '🏠');
@@ -117,9 +134,12 @@ export function generateAdmissionPDF(data) {
   const docLabels = {
     identificacao: 'Documento de Identificação',
     endereco: 'Comprovante de Endereço',
-    exame: 'Exame Admissional',
-    documentoFilhos: 'Documento dos Filhos'
+    exame: 'Exame Admissional'
   };
+  
+  if (data.temFilhos === 'Sim') {
+    docLabels.documentoFilhos = 'Documento dos Filhos';
+  }
   const fileUrls = data.fileUrls || {};
   Object.entries(docLabels).forEach(([key, label]) => {
     checkPage(10);
