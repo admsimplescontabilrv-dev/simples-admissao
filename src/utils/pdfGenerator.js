@@ -21,6 +21,11 @@ export async function generateAdmissionPDF(data) {
   };
 
   // ========== CABEÇALHO ==========
+  const headerHeight = 35;
+  doc.setFillColor(15, 15, 20); // Preto/Cinza bem escuro
+  doc.rect(0, 0, pageWidth, headerHeight, 'F');
+  y = 8; // Início dentro do header
+
   try {
     const res = await fetch('/logo.png');
     if (res.ok) {
@@ -34,7 +39,7 @@ export async function generateAdmissionPDF(data) {
       img.src = base64;
       await new Promise(resolve => img.onload = resolve);
       
-      const imgWidth = 50; // Largura da logo em mm
+      const imgWidth = 45; // Largura da logo
       const imgHeight = (img.height * imgWidth) / img.width;
       doc.addImage(base64, 'PNG', (pageWidth - imgWidth) / 2, y, imgWidth, imgHeight);
       y += imgHeight + 10;
@@ -42,6 +47,8 @@ export async function generateAdmissionPDF(data) {
   } catch (e) {
     console.error('Falha ao carregar logo no PDF', e);
   }
+
+  y = headerHeight + 15; // Volta para abaixo do header
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(14);
@@ -166,7 +173,7 @@ export async function generateAdmissionPDF(data) {
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(10);
     doc.setTextColor(hasFile ? 76 : 180, hasFile ? 175 : 180, hasFile ? 80 : 180);
-    doc.text(hasFile ? '✔ Anexado' : '— Não enviado', margin + 2, y + 5);
+    doc.text(hasFile ? 'Anexado' : '— Não enviado', margin + 2, y + 5);
     doc.setDrawColor(230, 230, 235);
     doc.line(margin + 2, y + 8, margin + contentWidth - 2, y + 8);
     y += 12;
