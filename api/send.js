@@ -83,7 +83,36 @@ export default async function handler(req, res) {
     const cardId = cardData.id;
     // O delay de 5 segundos agora acontece no Frontend (App.jsx) antes de chegar aqui.
 
-    // Anexa os arquivos no Trello usando a própria API do Trello para fazer o download (evita timeout da Vercel)
+    const attachmentPromises = [];
+
+    // Função auxiliar para anexar arquivo
+    const attachFileToTrello = async (fileUrl, filename) => {
+      try {
+        const fileResp = await fetch(fileUrl);
+        if (!fileResp.ok) throw new Error(`Falha ao baixar do Cloudinary: ${fileResp.status}`);
+        const fileBlob = await fileResp.blob();
+
+        const formData = new FormData();
+        formData.append('key', trelloKey);
+        formData.append('token', trelloToken);
+        formData.append('file', fileBlob, filename);
+        formData.append('setCover', 'false');
+
+        const attachResp = await fetch(`https://api.trello.com/1/cards/${cardId}/attachments`, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!attachResp.ok) {
+          console.error(`Erro ao anexar ${filename} no Trello. Status: ${attachResp.status}`);
+        }
+      } catch (err) {
+        console.error(`Erro ao anexar ${filename}:`, err);
+      }
+    };
+
+    // Anexa os arquivos baixando-os para Blob e enviando nativamente para o Trello
+    // Utiliza Promise.all para executar em paralelo e evitar timeout da Vercel (10 segundos)
     if (data.fileUrls) {
       const labels = {
         identificacao: "Doc de Identificação",
@@ -94,45 +123,23 @@ export default async function handler(req, res) {
 
       for (const [key, url] of Object.entries(data.fileUrls)) {
         if (url) {
-          try {
-            // Extrai a extensão da URL ou assume jpg caso não encontre
-            let extension = url.split('.').pop().split(/#|\?/)[0];
-            if (!['jpg', 'jpeg', 'png', 'pdf'].includes(extension.toLowerCase())) {
-              extension = 'jpg';
-            }
-            const filename = `${labels[key] || key}.${extension}`;
-
-            await fetch(`https://api.trello.com/1/cards/${cardId}/attachments?key=${trelloKey}&token=${trelloToken}`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                name: filename, // A extensão no nome força o Trello a reconhecer como arquivo (não como link)
-                url: url,
-                setCover: false // Impede capa automática
-              })
-            });
-          } catch (err) {
-            console.error(`Erro ao anexar ${key}:`, err);
+          let extension = url.split('.').pop().split(/#|\?/)[0];
+          if (!['jpg', 'jpeg', 'png', 'pdf'].includes(extension.toLowerCase())) {
+            extension = 'jpg';
           }
+          const filename = `${labels[key] || key}.${extension}`;
+          attachmentPromises.push(attachFileToTrello(url, filename));
         }
       }
     }
 
     if (data.pdfUrl) {
-      try {
-        await fetch(`https://api.trello.com/1/cards/${cardId}/attachments?key=${trelloKey}&token=${trelloToken}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: `Ficha de Admissão - ${data.nome || 'Candidato'}.pdf`,
-            url: data.pdfUrl,
-            setCover: false // Impede capa automática
-          })
-        });
-      } catch (err) {
-        console.error(`Erro ao anexar PDF:`, err);
-      }
+      const pdfFilename = `Ficha de Admissão - ${data.nome || 'Candidato'}.pdf`;
+      attachmentPromises.push(attachFileToTrello(data.pdfUrl, pdfFilename));
     }
+
+    // Aguarda todos os anexos serem enviados simultaneamente
+    await Promise.all(attachmentPromises);
 
     return res.status(200).json({ success: true });
   } catch (error) {
